@@ -1,21 +1,23 @@
+// src/app/api/addresses/[id]/route.ts
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getSessionUser } from '@/lib/auth'
 
-// 👇 Tipado compatible con App Router para el 2º argumento
-type Ctx = { params: Record<string, string> }
+// 👈 En Next 15, params es Promise<{ id: string }>
+type Ctx = { params: Promise<{ id: string }> }
 
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
   try {
     const me = await getSessionUser()
     if (!me) return NextResponse.json({ ok: false }, { status: 401 })
 
-    const id = Number(params.id)
+    const { id: idStr } = await params
+    const id = Number(idStr)
     if (!Number.isFinite(id)) {
       return NextResponse.json({ ok: false, message: 'ID inválido' }, { status: 400 })
     }
 
-    // Evita 'as any': borra sólo si pertenece al usuario
+    // Borra solo si es del usuario (sin `as any`)
     const r = await prisma.address.deleteMany({
       where: { id, userId: me.id },
     })
@@ -34,14 +36,15 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     const me = await getSessionUser()
     if (!me) return NextResponse.json({ ok: false }, { status: 401 })
 
-    const id = Number(params.id)
+    const { id: idStr } = await params
+    const id = Number(idStr)
     if (!Number.isFinite(id)) {
       return NextResponse.json({ ok: false, message: 'ID inválido' }, { status: 400 })
     }
 
     const { label, line1, line2, city, state, zip, phone } = await req.json()
 
-    // Evita 'as any': actualiza sólo si pertenece al usuario
+    // Actualiza solo si es del usuario (sin `as any`)
     const r = await prisma.address.updateMany({
       where: { id, userId: me.id },
       data: { label, line1, line2, city, state, zip, phone },
@@ -55,4 +58,5 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     return NextResponse.json({ ok: false, message: e?.message || 'Error' }, { status: 500 })
   }
 }
+
 
