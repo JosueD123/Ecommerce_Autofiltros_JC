@@ -1,11 +1,34 @@
+// src/app/login/page.tsx
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 
 type Tab = 'login' | 'register'
 
-export default function LoginRegister() {
+/**
+ * Wrapper con Suspense para evitar el error:
+ * "useSearchParams() should be wrapped in a suspense boundary"
+ */
+export default function LoginRegisterPage() {
+  return (
+    <Suspense fallback={<Fallback />}>
+      <LoginRegisterInner />
+    </Suspense>
+  )
+}
+
+function Fallback() {
+  return (
+    <main className="min-h-[70vh] flex items-center justify-center p-6">
+      <div className="mx-auto max-w-md w-full rounded-2xl border bg-white/80 backdrop-blur shadow-xl p-6">
+        <h1 className="text-xl font-bold">Cargando…</h1>
+      </div>
+    </main>
+  )
+}
+
+function LoginRegisterInner() {
   const qs = useSearchParams()
   const initialTab: Tab = (qs.get('tab') as Tab) === 'register' ? 'register' : 'login'
   const [tab, setTab] = useState<Tab>(initialTab)
@@ -27,7 +50,6 @@ export default function LoginRegister() {
 
   // Mantener ?tab= sincronizado en la URL
   useEffect(() => {
-    if (typeof window === 'undefined') return
     const u = new URL(window.location.href)
     u.searchParams.set('tab', tab)
     window.history.replaceState(null, '', u.toString())
@@ -126,8 +148,6 @@ export default function LoginRegister() {
     }
   }
 
-  const title = useMemo(() => (tab === 'login' ? 'Iniciar sesión' : 'Crear cuenta'), [tab])
-
   return (
     <main className="min-h-[70vh] bg-[radial-gradient(60%_70%_at_20%_-10%,#f3f6ff,transparent),radial-gradient(70%_60%_at_100%_0%,#fff1f1,transparent)]">
       <div className="max-w-6xl mx-auto px-4 py-10">
@@ -151,7 +171,9 @@ export default function LoginRegister() {
             </div>
 
             <div className="p-6 sm:p-7">
-              <h1 className="text-xl font-bold tracking-tight mb-1">{title}</h1>
+              <h1 className="text-xl font-bold tracking-tight mb-1">
+                {tab === 'login' ? 'Iniciar sesión' : 'Crear cuenta'}
+              </h1>
               <p className="text-sm text-gray-600 mb-5">
                 {tab === 'login'
                   ? 'Accede para ver tu cuenta y tus pedidos.'
@@ -315,5 +337,6 @@ export default function LoginRegister() {
     </main>
   )
 }
+
 
 
