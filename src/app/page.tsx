@@ -1,103 +1,348 @@
-import Image from "next/image";
+import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+    <main className="min-h-[70vh]">
+      {/* FRANJA CORPORATIVA CON DEGRADADO */}
+<section className="relative overflow-hidden">
+  {/* Fondo degradado tipo metalizado */}
+  <div className="absolute inset-0 bg-gradient-to-r from-[#8b0000] via-[#b22222] to-[#d32f2f]" />
+  <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top_left,_#ffffff20,_transparent_70%)]" />
+  <div className="relative max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-center gap-4 py-8 px-4 text-white">
+    {/* Logo */}
+    <img
+      src="/images/logoJC.png"
+      alt="Autofiltros JC, S.A."
+      className="h-28 md:h-36 w-auto object-contain drop-shadow-lg"
+    />
+    {/* Texto */}
+    <div className="text-center md:text-left">
+      <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight drop-shadow-md">
+        Autofiltros JC, S.A.
+      </h2>
+      <p className="text-gray-100 text-sm md:text-base mt-1 max-w-md">
+        “Filtros y accesorios automotrices de calidad, al alcance de todos.”
+      </p>
     </div>
-  );
+  </div>
+</section>
+
+{/* LÍNEA DIVISORIA METÁLICA */}
+<div className="relative h-[2px]">
+  {/* Capa metálica base */}
+  <div className="absolute inset-0 bg-gradient-to-r from-gray-300 via-gray-100 to-gray-300" />
+  {/* Reflejo brillante al centro */}
+  <div className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/80 to-transparent blur-[1px]" />
+  {/* Sombra sutil inferior */}
+  <div className="absolute inset-x-0 bottom-0 h-[1px] bg-black/10" />
+</div>
+{/* SECCIÓN INSTITUCIONAL */}
+<section className="bg-white">
+  <div className="max-w-7xl mx-auto px-4 py-10 grid md:grid-cols-3 gap-6">
+    <div className="md:col-span-3">
+      <h3 className="text-2xl font-bold">¿Quiénes somos?</h3>
+      <p className="text-gray-700 mt-2 max-w-3xl">
+        En <span className="font-semibold">Autofiltros JC, S.A.</span> ofrecemos filtros y accesorios automotrices
+        con enfoque en disponibilidad, precio justo y servicio técnico. Atendemos a talleres,
+        flotillas y público en general en toda Guatemala.
+      </p>
+    </div>
+
+    <div className="rounded-2xl border p-5">
+      <h4 className="font-semibold text-lg flex items-center gap-2">
+        🎯 <span>Misión</span>
+      </h4>
+      <p className="text-gray-700 mt-2">
+        Proveer soluciones en filtración y accesorios automotrices con calidad garantizada,
+        asesoría confiable y entregas ágiles para mantener el parque vehicular del país en marcha.
+      </p>
+    </div>
+
+    <div className="rounded-2xl border p-5">
+      <h4 className="font-semibold text-lg flex items-center gap-2">
+        🚀 <span>Visión</span>
+      </h4>
+      <p className="text-gray-700 mt-2">
+        Ser el e-commerce líder de filtros y accesorios en Guatemala, reconocido por
+        su catálogo completo, experiencia de compra simple y atención excepcional.
+      </p>
+    </div>
+
+    <div className="rounded-2xl border p-5">
+      <h4 className="font-semibold text-lg flex items-center gap-2">
+        🤝 <span>Valores</span>
+      </h4>
+      <ul className="text-gray-700 mt-2 list-disc pl-5 space-y-1">
+        <li>Honestidad y precio justo</li>
+        <li>Rapidez y cumplimiento</li>
+        <li>Asesoría técnica</li>
+        <li>Orientación al cliente</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+{/* BENEFICIOS / CONFIANZA */}
+<section className="bg-gradient-to-b from-[#eaf6ff] to-[#d6ecff]">
+  <div className="max-w-7xl mx-auto px-4 py-10 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="rounded-2xl border bg-white p-5">
+      <div className="font-semibold flex items-center gap-2">
+        🚚 <span>Envíos a todo el país</span>
+      </div>
+      <p className="text-sm text-gray-600 mt-1">
+        Cobertura nacional con aliados logísticos.
+      </p>
+    </div>
+
+    <div className="rounded-2xl border bg-white p-5">
+      <div className="font-semibold flex items-center gap-2">
+        💳 <span>Pago seguro</span>
+      </div>
+      <p className="text-sm text-gray-600 mt-1">
+        Stripe (test) y métodos locales próximamente.
+      </p>
+    </div>
+
+    <div className="rounded-2xl border bg-white p-5">
+      <div className="font-semibold flex items-center gap-2">
+        🏷️ <span>Marcas reconocidas</span>
+      </div>
+      <p className="text-sm text-gray-600 mt-1">
+        A1, Kayser, Master, Seineca, Syntecfíl…
+      </p>
+    </div>
+
+    <div className="rounded-2xl border bg-white p-5">
+      <div className="font-semibold flex items-center gap-2">
+        🧰 <span>Asesoría técnica</span>
+      </div>
+      <p className="text-sm text-gray-600 mt-1">
+        Soporte para compatibilidades y aplicaciones.
+      </p>
+    </div>
+  </div>
+</section>
+
+{/* CTA / ACCESO RÁPIDO */}
+<section className="bg-white">
+  <div className="max-w-7xl mx-auto px-4 py-10 flex flex-col md:flex-row items-center gap-4">
+    <div className="flex-1">
+      <h3 className="text-2xl md:text-3xl font-bold">Encuentra el filtro correcto en minutos</h3>
+      <p className="text-gray-700 mt-2">
+        Busca por marca, SKU o compatibilidad. Catálogo en crecimiento continuo.
+      </p>
+      <div className="mt-4 flex gap-3">
+        <a href="/catalogo" className="bg-black text-white rounded-lg px-5 py-2 hover:opacity-90">
+          Ver catálogo
+        </a>
+        <a href="/nosotros" className="border rounded-lg px-5 py-2 hover:bg-gray-50">
+          Conócenos
+        </a>
+      </div>
+    </div>
+
+    <div className="flex-1 grid grid-cols-2 gap-3">
+      <a href="/catalogo?categoria=filtros" className="rounded-xl border p-4 hover:shadow-sm">
+        <div className="font-semibold">Filtros</div>
+        <div className="text-sm text-gray-600">Aire · Aceite · Cabina · Combustible · Caja Automatica</div>
+      </a>
+      <a href="/catalogo?categoria=accesorios" className="rounded-xl border p-4 hover:shadow-sm">
+  <div className="font-semibold">Accesorios</div>
+  <div className="text-sm text-gray-600">Limpiadores, adaptadores, etc.</div>
+</a>
+      <a href="/catalogo?marca=1" className="rounded-xl border p-4 hover:shadow-sm">
+        <div className="font-semibold">Marcas</div>
+        <div className="text-sm text-gray-600">Busca por fabricante</div>
+      </a>
+      <a href="/carrito" className="rounded-xl border p-4 hover:shadow-sm">
+        <div className="font-semibold">Mi carrito</div>
+        <div className="text-sm text-gray-600">Revisa tu pedido</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+      {/* HERO */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(1000px_600px_at_50%_-200px,#5fb0ff,transparent)]" />
+        <div className="max-w-7xl mx-auto px-6 py-14 md:py-20 relative">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <span className="inline-block text-xs font-medium tracking-widest px-2 py-1 rounded-full bg-black text-white">
+                Autofiltros JC
+              </span>
+              <h1 className="mt-4 text-3xl md:text-5xl font-extrabold leading-tight">
+                Filtros y accesorios automotrices en Guatemala
+              </h1>
+              <p className="mt-4 text-gray-700 max-w-prose">
+                Catálogo actualizado, pagos seguros y envíos a todo el país. Somos
+                especialistas en filtros de aire, aceite, cabina, gasolina y caja automática.
+              </p>
+
+              <div className="mt-6 flex gap-3">
+                <Link
+                  href="/catalogo"
+                  className="px-5 py-2.5 rounded-lg bg-black text-white text-sm hover:opacity-90"
+                >
+                  Ver catálogo
+                </Link>
+                <a
+                  href="#contacto"
+                  className="px-5 py-2.5 rounded-lg border text-sm hover:bg-gray-50"
+                >
+                  Contactar
+                </a>
+              </div>
+
+              <div className="mt-6 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+                <div className="flex items-center gap-2">
+                  <span>🛒</span> Pago con Stripe (modo test)
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>🚚</span> Envíos a todo el país
+                </div>
+                <div className="flex items-center gap-2">
+                  <span>🔄</span> Devoluciones fáciles
+                </div>
+              </div>
+            </div>
+
+            {/* Imagen/Mockup (usa una de /public/images si deseas) */}
+<div className="rounded-2xl border bg-white/70 p-4 flex items-center justify-center">
+  <img
+  src="/images/logoJC.png"
+  alt="Autofiltros JC, S.A."
+  className="w-full max-w-md md:max-w-lg mx-auto h-auto object-contain rounded-xl"
+/>
+</div>
+          </div>
+        </div>
+      </section>
+
+      {/* CATEGORÍAS DESTACADAS */}
+      <section className="max-w-7xl mx-auto px-6 py-12 md:py-16">
+        <h2 className="text-xl md:text-2xl font-bold">Categorías destacadas</h2>
+        <p className="text-gray-600 text-sm mt-1">
+          Explora rápidamente lo que más se busca.
+        </p>
+
+        <div className="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { name: 'Filtros de Aire', qs: 'categoria=filtros-de-aire' },
+            { name: 'Filtros de Aceite', qs: 'categoria=filtros-de-aceite' },
+            { name: 'Filtros de Cabina', qs: 'categoria=filtros-de-cabina' },
+            { name: 'Caja Automática', qs: 'categoria=filtro-de-caja-automatica' },
+          ].map((c) => (
+            <Link
+              key={c.name}
+              href={`/catalogo?${c.qs}`}
+              className="rounded-xl border p-4 hover:shadow-sm bg-white/70"
+            >
+              <div className="text-3xl">🧰</div>
+              <div className="mt-2 font-medium">{c.name}</div>
+              <div className="text-xs text-gray-600">Ver productos →</div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* QUIÉNES SOMOS / MISIÓN / VISIÓN */}
+      <section className="bg-[#d6ecff]">
+        <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-1">
+              <h2 className="text-xl md:text-2xl font-bold">Quiénes somos</h2>
+              <p className="mt-2 text-gray-700">
+                En <b>Autofiltros JC</b> brindamos soluciones confiables en filtros y
+                accesorios automotrices. Trabajamos con marcas de confianza y un
+                inventario verificado para garantizar compatibilidad y calidad.
+              </p>
+            </div>
+
+            <div className="lg:col-span-2 grid md:grid-cols-2 gap-4">
+              <div className="rounded-2xl border bg-white p-5">
+                <div className="text-2xl">🎯</div>
+                <h3 className="mt-2 font-semibold">Misión</h3>
+                <p className="text-gray-700 text-sm mt-1">
+                  Proveer filtros y accesorios de calidad, con asesoría experta y
+                  entregas ágiles que mantengan los vehículos de nuestros clientes en su mejor
+                  desempeño.
+                </p>
+              </div>
+              <div className="rounded-2xl border bg-white p-5">
+                <div className="text-2xl">🚀</div>
+                <h3 className="mt-2 font-semibold">Visión</h3>
+                <p className="text-gray-700 text-sm mt-1">
+                  Convertirnos en el e-commerce de referencia en Guatemala para filtros y
+                  accesorios, destacando por experiencia de compra y soporte post-venta.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BENEFICIOS */}
+      <section className="max-w-7xl mx-auto px-6 py-12 md:py-16">
+        <h2 className="text-xl md:text-2xl font-bold">¿Por qué comprar con nosotros?</h2>
+        <div className="mt-6 grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { t: 'Compatibilidad clara', d: 'SKU, marca/modelo y asesoría técnica.' },
+            { t: 'Precios justos', d: 'Transparencia y promos regulares.' },
+            { t: 'Pagos seguros', d: 'Stripe (modo test en desarrollo).' },
+            { t: 'Soporte humano', d: 'Te ayudamos a elegir lo correcto.' },
+          ].map((b) => (
+            <div key={b.t} className="rounded-xl border p-4 bg-white/70">
+              <div className="text-2xl">✅</div>
+              <div className="mt-2 font-medium">{b.t}</div>
+              <div className="text-xs text-gray-600 mt-1">{b.d}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="rounded-2xl border bg-black text-white p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-xl md:text-2xl font-bold">Encuentra tu filtro ideal</h3>
+            <p className="text-white/80 text-sm mt-1">
+              Filtra por marca, categoría o busca por código.
+            </p>
+          </div>
+          <Link
+            href="/catalogo"
+            className="px-5 py-2.5 rounded-lg bg-white text-black text-sm hover:opacity-90"
+          >
+            Ir al catálogo
+          </Link>
+        </div>
+      </section>
+
+      {/* CONTACTO */}
+      <section id="contacto" className="border-t bg-gray-50/60">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <h2 className="text-xl md:text-2xl font-bold">Contacto</h2>
+          <div className="mt-3 grid md:grid-cols-3 gap-4 text-sm">
+            <div className="rounded-xl border bg-white p-4">
+              <div className="font-medium">Teléfono</div>
+              <div className="text-gray-700">
+  <a href="tel:+50244984479" className="underline hover:text-emerald-600">
+    +502 4498 4479
+  </a>
+</div>
+            </div>
+            <div className="rounded-xl border bg-white p-4">
+              <div className="font-medium">Email</div>
+              <div className="text-gray-700">ventas@autofiltrosjc.com</div>
+            </div>
+            <div className="rounded-xl border bg-white p-4">
+              <div className="font-medium">Horario</div>
+              <div className="text-gray-700">Lun–Sáb 8:00–18:00</div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  )
 }

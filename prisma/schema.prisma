@@ -1,0 +1,137 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/**
+ * ========= Catálogo base =========
+ */
+model Brand {
+  id       Int       @id @default(autoincrement())
+  name     String    @unique
+  products Product[]
+}
+
+model Category {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  products Product[]
+}
+
+model Product {
+  id          Int            @id @default(autoincrement())
+  sku         String         @unique
+  name        String
+  slug        String         @unique
+  description String?
+  price       Decimal        @db.Decimal(10, 2)
+  cost        Decimal        @db.Decimal(10, 2)
+  stock       Int            @default(0)
+  status      String         @default("active")
+  oemCode     String?
+  brand       Brand          @relation(fields: [brandId], references: [id])
+  brandId     Int
+  category    Category       @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  images      ProductImage[]
+  createdAt   DateTime       @default(now())
+  OrderItem   OrderItem[]
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  url       String
+  isPrimary Boolean @default(false)
+}
+
+/**
+ * ========= Usuarios y direcciones =========
+ */
+enum Role {
+  ADMIN
+  SELLER
+  CUSTOMER
+}
+
+model User {
+  id           Int       @id @default(autoincrement())
+  name         String
+  email        String    @unique
+  passwordHash String
+  role         Role      @default(CUSTOMER)
+  phone        String?
+  createdAt    DateTime  @default(now())
+  addresses    Address[]
+  Order        Order[]
+}
+
+model Address {
+  id      Int     @id @default(autoincrement())
+  user    User    @relation(fields: [userId], references: [id])
+  userId  Int
+  label   String?
+  line1   String
+  line2   String?
+  city    String
+  state   String?
+  zip     String?
+  country String  @default("GT")
+  phone   String?
+}
+
+// ======== Órdenes / Checkout ========
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+model Order {
+  id        Int         @id @default(autoincrement())
+  user      User?       @relation(fields: [userId], references: [id])
+  userId    Int?
+  email     String
+  total     Decimal     @db.Decimal(10, 2)
+  currency  String      @default("GTQ")
+  status    OrderStatus @default(PENDING)
+  createdAt DateTime    @default(now())
+  items     OrderItem[]
+  stripeId  String?     @unique
+}
+
+model OrderItem {
+  id        Int     @id @default(autoincrement())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   Int
+  product   Product @relation(fields: [productId], references: [id])
+  productId Int
+  name      String
+  price     Decimal @db.Decimal(10, 2)
+  qty       Int
+}
+
+model Newsletter {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model ContactMessage {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String
+  phone     String?
+  subject   String?
+  message   String
+  createdAt DateTime @default(now())
+}
+
