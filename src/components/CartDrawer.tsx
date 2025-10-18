@@ -1,4 +1,3 @@
-// src/components/CartDrawer.tsx
 'use client'
 import { useCart } from '@/store/cart'
 import { usePathname } from 'next/navigation'
@@ -12,6 +11,8 @@ export default function CartDrawer() {
   const isAdmin = pathname.startsWith('/admin')
   const [open, setOpen] = useState(false)
   const { show } = useToast()
+
+  // ✅ los hooks van arriba; este early-return no rompe reglas
   if (isAdmin) return null
 
   const subtotal = useMemo(
@@ -19,16 +20,21 @@ export default function CartDrawer() {
     [items]
   )
 
+  // bloquear scroll y cerrar con ESC
   useEffect(() => {
     if (!open) { document.body.style.overflow = ''; return }
     document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
     window.addEventListener('keydown', onKey)
-    return () => { window.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
+    return () => {
+      window.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
   }, [open])
 
   return (
     <>
+      {/* Botón carrito */}
       <button
         onClick={() => setOpen(true)}
         className="relative rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
@@ -41,21 +47,31 @@ export default function CartDrawer() {
         )}
       </button>
 
-      {open && <div onClick={() => setOpen(false)} className="fixed inset-0 z-40 bg-black/60" />}
+      {/* Overlay */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          className="fixed inset-0 z-40 bg-black/60"
+          aria-hidden="true"
+        />
+      )}
 
-      {/* 👇 Forzamos color de texto dentro del drawer */}
+      {/* Drawer */}
       <aside
         onClick={(e) => e.stopPropagation()}
         className={`fixed top-0 right-0 z-50 h-dvh w-full sm:w-[420px]
         bg-white text-gray-900 flex flex-col shadow-2xl ring-1 ring-black/5 border-l
         transform transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'}`}
         aria-label="Carrito de compras"
+        role="dialog"
+        aria-modal="true"
       >
         <header className="h-14 px-5 border-b flex items-center justify-between">
           <h2 className="text-base font-semibold">Carrito de compras</h2>
           <button onClick={() => setOpen(false)} className="text-gray-600 hover:text-black" aria-label="Cerrar">×</button>
         </header>
 
+        {/* Lista con scroll */}
         <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
           {items.length === 0 ? (
             <p className="text-sm text-gray-700">
@@ -86,6 +102,7 @@ export default function CartDrawer() {
                           }}
                           inputMode="numeric"
                           className="w-12 h-8 border rounded-full text-center text-sm"
+                          aria-label="Cantidad"
                         />
                         <button onClick={() => inc(i.id)} className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50" aria-label="Aumentar">+</button>
                       </div>
@@ -108,6 +125,7 @@ export default function CartDrawer() {
           )}
         </div>
 
+        {/* Footer fijo */}
         <footer className="border-t p-5 bg-white">
           <div className="flex items-center justify-between text-base font-semibold mb-3">
             <span>Total</span>
@@ -131,4 +149,5 @@ export default function CartDrawer() {
     </>
   )
 }
+
 
