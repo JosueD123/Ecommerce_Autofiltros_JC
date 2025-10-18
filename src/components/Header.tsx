@@ -1,11 +1,30 @@
+// src/components/Header.tsx
 'use client'
 
 import Link from 'next/link'
 import HeaderActions from './HeaderActions'
+import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
 
 export default function Header() {
+  // Fallback mínimo y estable mientras carga el componente con hooks
+  return (
+    <Suspense
+      fallback={
+        <header className="sticky top-0 z-40 w-full border-b bg-white/70 backdrop-blur">
+          <div className="max-w-6xl mx-auto px-4 h-16 flex items-center">
+            <Link href="/" className="font-bold">Autofiltros JC</Link>
+            <div className="flex-1" />
+          </div>
+        </header>
+      }
+    >
+      <InnerHeader />
+    </Suspense>
+  )
+}
+
+function InnerHeader() {
   const router = useRouter()
   const qs = useSearchParams()
   const pathname = usePathname()
@@ -70,30 +89,10 @@ export default function Header() {
         {isAdmin ? (
           <>
             <nav className="flex gap-4 text-sm">
-              <Link
-                href="/admin/productos"
-                className={adminActive === 'productos' ? 'font-semibold underline' : undefined}
-              >
-                Productos
-              </Link>
-              <Link
-                href="/admin/marcas"
-                className={adminActive === 'marcas' ? 'font-semibold underline' : undefined}
-              >
-                Marcas
-              </Link>
-              <Link
-                href="/admin/categorias"
-                className={adminActive === 'categorias' ? 'font-semibold underline' : undefined}
-              >
-                Categorías
-              </Link>
-              <Link
-                href="/admin/pedidos"
-                className={adminActive === 'pedidos' ? 'font-semibold underline' : undefined}
-              >
-                Pedidos
-              </Link>
+              <Link href="/admin/productos"  className={adminActive === 'productos'  ? 'font-semibold underline' : undefined}>Productos</Link>
+              <Link href="/admin/marcas"     className={adminActive === 'marcas'     ? 'font-semibold underline' : undefined}>Marcas</Link>
+              <Link href="/admin/categorias" className={adminActive === 'categorias' ? 'font-semibold underline' : undefined}>Categorías</Link>
+              <Link href="/admin/pedidos"    className={adminActive === 'pedidos'    ? 'font-semibold underline' : undefined}>Pedidos</Link>
             </nav>
 
             <div className="flex-1" />
@@ -116,7 +115,6 @@ export default function Header() {
 
             {/* Buscador con icono de lupa */}
             <div className="relative">
-              {/* Icono */}
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
@@ -145,12 +143,3 @@ export default function Header() {
     </header>
   )
 }
-
-
-
-
-
-
-
-
-
