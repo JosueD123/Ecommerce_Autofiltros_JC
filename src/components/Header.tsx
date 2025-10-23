@@ -7,7 +7,6 @@ import { Suspense, useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams, usePathname } from 'next/navigation'
 
 export default function Header() {
-  // Fallback mínimo y estable mientras carga el componente con hooks
   return (
     <Suspense
       fallback={
@@ -29,11 +28,9 @@ function InnerHeader() {
   const qs = useSearchParams()
   const pathname = usePathname()
 
-  // Evitar mismatch de hidratación
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
 
-  // ¿Estamos en /admin?
   const isAdmin = pathname.startsWith('/admin')
 
   // ====== BUSCADOR (solo público) ======
@@ -55,12 +52,13 @@ function InnerHeader() {
     return () => clearTimeout(t)
   }, [q, pathname, qs, router, isAdmin])
 
-  // resaltar link activo en admin
+  // resaltar link activo en admin (AGREGAMOS 'analytics')
   const adminActive = useMemo(() => {
     if (!isAdmin) return ''
     if (pathname.startsWith('/admin/pedidos')) return 'pedidos'
     if (pathname.startsWith('/admin/marcas')) return 'marcas'
     if (pathname.startsWith('/admin/categorias')) return 'categorias'
+    if (pathname.startsWith('/admin/analytics')) return 'analytics'
     return 'productos'
   }, [pathname, isAdmin])
 
@@ -69,7 +67,6 @@ function InnerHeader() {
     window.location.href = '/'
   }
 
-  // ========= CLASES SIN MISMATCH =========
   const baseShell = 'sticky top-0 z-40 w-full border-b backdrop-blur'
   const stableFirstPaint = `${baseShell} bg-white/70`
   const desired =
@@ -93,6 +90,8 @@ function InnerHeader() {
               <Link href="/admin/marcas"     className={adminActive === 'marcas'     ? 'font-semibold underline' : undefined}>Marcas</Link>
               <Link href="/admin/categorias" className={adminActive === 'categorias' ? 'font-semibold underline' : undefined}>Categorías</Link>
               <Link href="/admin/pedidos"    className={adminActive === 'pedidos'    ? 'font-semibold underline' : undefined}>Pedidos</Link>
+              {/* NUEVO: enlace al panel de estadísticas */}
+              <Link href="/admin/analytics"  className={adminActive === 'analytics'  ? 'font-semibold underline' : undefined}>Estadísticas</Link>
             </nav>
 
             <div className="flex-1" />
@@ -143,3 +142,4 @@ function InnerHeader() {
     </header>
   )
 }
+
