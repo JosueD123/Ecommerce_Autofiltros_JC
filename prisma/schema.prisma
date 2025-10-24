@@ -166,7 +166,10 @@ model VehicleVariant {
   fitments ProductFitment[]
 
   @@index([modelId, year])
+  // ⬇️ NUEVO: clave única compuesta que usaremos en upsert
+  @@unique([modelId, year, engine, body], name: "modelId_year_engine_body")
 }
+
 
 model ProductFitment {
   id        Int            @id @default(autoincrement())

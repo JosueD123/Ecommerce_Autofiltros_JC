@@ -28,6 +28,7 @@ function InnerHeader() {
   const qs = useSearchParams()
   const pathname = usePathname()
 
+  // Evitar mismatch de hidratación
   const [mounted, setMounted] = useState(false)
   useEffect(() => { setMounted(true) }, [])
 
@@ -52,13 +53,14 @@ function InnerHeader() {
     return () => clearTimeout(t)
   }, [q, pathname, qs, router, isAdmin])
 
-  // resaltar link activo en admin (AGREGAMOS 'analytics')
+  // resaltar link activo en admin (agregamos 'analytics' y 'compatibilidad')
   const adminActive = useMemo(() => {
     if (!isAdmin) return ''
     if (pathname.startsWith('/admin/pedidos')) return 'pedidos'
     if (pathname.startsWith('/admin/marcas')) return 'marcas'
     if (pathname.startsWith('/admin/categorias')) return 'categorias'
     if (pathname.startsWith('/admin/analytics')) return 'analytics'
+    if (pathname.startsWith('/admin/compatibilidad')) return 'compatibilidad'
     return 'productos'
   }, [pathname, isAdmin])
 
@@ -67,6 +69,7 @@ function InnerHeader() {
     window.location.href = '/'
   }
 
+  // Estilos (blanco estable en primer paint y luego temas)
   const baseShell = 'sticky top-0 z-40 w-full border-b backdrop-blur'
   const stableFirstPaint = `${baseShell} bg-white/70`
   const desired =
@@ -86,12 +89,12 @@ function InnerHeader() {
         {isAdmin ? (
           <>
             <nav className="flex gap-4 text-sm">
-              <Link href="/admin/productos"  className={adminActive === 'productos'  ? 'font-semibold underline' : undefined}>Productos</Link>
-              <Link href="/admin/marcas"     className={adminActive === 'marcas'     ? 'font-semibold underline' : undefined}>Marcas</Link>
-              <Link href="/admin/categorias" className={adminActive === 'categorias' ? 'font-semibold underline' : undefined}>Categorías</Link>
-              <Link href="/admin/pedidos"    className={adminActive === 'pedidos'    ? 'font-semibold underline' : undefined}>Pedidos</Link>
-              {/* NUEVO: enlace al panel de estadísticas */}
-              <Link href="/admin/analytics"  className={adminActive === 'analytics'  ? 'font-semibold underline' : undefined}>Estadísticas</Link>
+              <Link href="/admin/productos"       className={adminActive === 'productos'       ? 'font-semibold underline' : undefined}>Productos</Link>
+              <Link href="/admin/marcas"          className={adminActive === 'marcas'          ? 'font-semibold underline' : undefined}>Marcas</Link>
+              <Link href="/admin/categorias"      className={adminActive === 'categorias'      ? 'font-semibold underline' : undefined}>Categorías</Link>
+              <Link href="/admin/pedidos"         className={adminActive === 'pedidos'         ? 'font-semibold underline' : undefined}>Pedidos</Link>
+              <Link href="/admin/compatibilidad"  className={adminActive === 'compatibilidad'  ? 'font-semibold underline' : 'hover:underline'}>Compatibilidad</Link>
+              <Link href="/admin/analytics"       className={adminActive === 'analytics'       ? 'font-semibold underline' : 'hover:underline'}>Estadísticas</Link>
             </nav>
 
             <div className="flex-1" />
@@ -117,7 +120,7 @@ function InnerHeader() {
               <svg
                 aria-hidden="true"
                 viewBox="0 0 24 24"
-                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400"
+                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-200"
               >
                 <path
                   fill="currentColor"
@@ -142,4 +145,5 @@ function InnerHeader() {
     </header>
   )
 }
+
 
