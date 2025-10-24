@@ -83,7 +83,7 @@ export default function Footer() {
             </li>
             <li>
               Email:{' '}
-              <a href="mailto:ventas@autofiltrosjc.com" className="underline hover:text-[#b71c1c]">
+              <a href="mailto:ventas@grupojcautomotriz.com" className="underline hover:text-[#b71c1c]">
                 ventas@grupojcautomotriz.com
               </a>
             </li>
