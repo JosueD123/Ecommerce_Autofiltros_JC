@@ -38,6 +38,10 @@ export default function AdminCompatibilidad() {
   const [models, setModels] = useState<Model[]>([])
   const [variants, setVariants] = useState<Variant[]>([])
 
+  // ====== filtros/búsquedas ======
+  const [productFilter, setProductFilter] = useState('') // filtro de productos (SKU/nombre)
+  const [rowFilter, setRowFilter] = useState('')         // filtro de filas de compatibilidad
+
   // Form "Agregar"
   const [makeName, setMakeName] = useState('')
   const [modelName, setModelName] = useState('')
@@ -207,32 +211,81 @@ export default function AdminCompatibilidad() {
     }
   }
 
+  // ====== Derivados (memo) ======
   const selectedProduct = useMemo(
     () => products.find(p => p.id === productId),
     [products, productId]
   )
 
+  // Productos filtrados por búsqueda
+  const filteredProducts = useMemo(() => {
+    const q = productFilter.trim().toLowerCase()
+    if (!q) return products
+    return products.filter(p =>
+      p.sku.toLowerCase().includes(q) || p.name.toLowerCase().includes(q)
+    )
+  }, [products, productFilter])
+
+  // Filas visibles según filtro de tabla
+  const visibleRows = useMemo(() => {
+    const q = rowFilter.trim().toLowerCase()
+    if (!q) return rows
+    return rows.filter(r => {
+      const make = r.variant.model.make.name.toLowerCase()
+      const model = r.variant.model.name.toLowerCase()
+      const year = String(r.variant.year)
+      const engine = (r.variant.engine ?? '').toLowerCase()
+      const body = (r.variant.body ?? '').toLowerCase()
+      const notes = (r.notes ?? '').toLowerCase()
+      return (
+        make.includes(q) ||
+        model.includes(q) ||
+        year.includes(q) ||
+        engine.includes(q) ||
+        body.includes(q) ||
+        notes.includes(q)
+      )
+    })
+  }, [rows, rowFilter])
+
   return (
     <main className="max-w-6xl mx-auto p-6 space-y-6">
       <h1 className="text-2xl font-bold">Compatibilidades por producto</h1>
 
-      {/* Selección de producto */}
-      <section className="rounded-xl border p-4 bg-white/80">
-        <label className="block text-sm font-medium mb-2">Producto</label>
+      {/* Selección de producto + buscador */}
+      <section className="rounded-xl border p-4 bg-white/80 space-y-3">
+        <label className="block text-sm font-medium">Producto</label>
+
+        <div className="flex items-center gap-2">
+          <input
+            value={productFilter}
+            onChange={(e) => setProductFilter(e.target.value)}
+            placeholder="Buscar por SKU o nombre…"
+            className="border rounded-lg px-3 py-2 w-full md:w-1/2"
+            aria-label="Filtrar productos por texto"
+          />
+          {productFilter && (
+            <span className="text-xs text-gray-500">
+              {filteredProducts.length} resultado{filteredProducts.length === 1 ? '' : 's'}
+            </span>
+          )}
+        </div>
+
         <select
           className="border rounded-lg px-3 py-2 w-full md:w-1/2"
           value={productId}
           onChange={e => setProductId(e.target.value ? Number(e.target.value) : '')}
         >
           <option value="">— Selecciona un producto —</option>
-          {products.map(p => (
+          {filteredProducts.map(p => (
             <option key={p.id} value={p.id}>
               {p.sku} — {p.name}
             </option>
           ))}
         </select>
+
         {selectedProduct && (
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-gray-600">
             <strong>Seleccionado:</strong> {selectedProduct.sku} — {selectedProduct.name}
           </p>
         )}
@@ -346,12 +399,22 @@ export default function AdminCompatibilidad() {
         </form>
       </section>
 
-      {/* Tabla de fitments */}
+      {/* Tabla de fitments + filtro */}
       <section className="rounded-xl border p-4 bg-white/80">
-        <h2 className="font-semibold mb-3">Compatibilidades del producto</h2>
+        <div className="flex items-center justify-between mb-3 gap-3">
+          <h2 className="font-semibold">Compatibilidades del producto</h2>
+          <input
+            value={rowFilter}
+            onChange={(e) => setRowFilter(e.target.value)}
+            placeholder="Filtrar por marca, modelo, año, motor…"
+            className="border rounded-lg px-3 py-1.5 w-full md:w-64"
+            aria-label="Filtrar compatibilidades"
+          />
+        </div>
+
         {loading ? (
           <div>Cargando…</div>
-        ) : rows.length === 0 ? (
+        ) : visibleRows.length === 0 ? (
           <div className="text-sm text-gray-600">Sin registros.</div>
         ) : (
           <div className="overflow-x-auto">
@@ -368,7 +431,7 @@ export default function AdminCompatibilidad() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map(r => (
+                {visibleRows.map(r => (
                   <tr key={r.id} className="border-b last:border-0">
                     {editingId === r.id ? (
                       <>
@@ -426,5 +489,6 @@ export default function AdminCompatibilidad() {
     </main>
   )
 }
+
 
 
