@@ -1,7 +1,9 @@
+// src/app/producto/[slug]/page.tsx
 import { prisma } from '@/lib/prisma'
 import { AddToCartButton } from './AddToCartButton'
 import Breadcrumbs from '@/components/Breadcrumbs'
 import Tabs from '@/components/Tabs'
+import Compatibilidad from './Compatibilidad' // ⬅️ NUEVO
 
 type Props = { params: Promise<{ slug: string }> }
 
@@ -76,13 +78,7 @@ export default async function Producto({ params }: Props) {
               {
                 key: 'fit',
                 label: 'Compatibilidad',
-                content: (
-                  <p className="text-sm text-gray-600">
-                    Para este demo, la compatibilidad por modelo de vehículo se mostrará aquí cuando
-                    agreguemos la tabla <code>product_fitment</code>. Si ya la tienes en MySQL,
-                    luego la leemos y listamos (año/marca/modelo).
-                  </p>
-                ),
+                content: <Compatibilidad productId={p.id} />, // ⬅️ AQUÍ
               },
             ]}
           />
@@ -91,6 +87,7 @@ export default async function Producto({ params }: Props) {
     </main>
   )
 }
+
 
 
 

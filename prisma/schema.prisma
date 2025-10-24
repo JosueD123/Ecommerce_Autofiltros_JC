@@ -43,6 +43,8 @@ model Product {
   images      ProductImage[]
   createdAt   DateTime       @default(now())
   OrderItem   OrderItem[]
+
+  fitments ProductFitment[]
 }
 
 model ProductImage {
@@ -135,3 +137,44 @@ model ContactMessage {
   createdAt DateTime @default(now())
 }
 
+// ======== Vehículos & compatibilidad (fitment) ========
+
+model VehicleMake {
+  id     Int            @id @default(autoincrement())
+  name   String         @unique
+  models VehicleModel[]
+}
+
+model VehicleModel {
+  id       Int              @id @default(autoincrement())
+  name     String
+  makeId   Int
+  make     VehicleMake      @relation(fields: [makeId], references: [id])
+  variants VehicleVariant[]
+
+  @@unique([makeId, name]) // evita 'Versa' repetido en la misma marca
+}
+
+model VehicleVariant {
+  id      Int          @id @default(autoincrement())
+  year    Int
+  engine  String?
+  body    String?
+  modelId Int
+  model   VehicleModel @relation(fields: [modelId], references: [id])
+
+  fitments ProductFitment[]
+
+  @@index([modelId, year])
+}
+
+model ProductFitment {
+  id        Int            @id @default(autoincrement())
+  productId Int
+  product   Product        @relation(fields: [productId], references: [id])
+  variantId Int
+  variant   VehicleVariant @relation(fields: [variantId], references: [id])
+  notes     String?
+
+  @@unique([productId, variantId])
+}
