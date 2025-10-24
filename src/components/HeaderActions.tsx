@@ -16,7 +16,7 @@ type Me =
 
 export default function HeaderActions() {
   const pathname = usePathname()
-  const isAdmin = pathname.startsWith('/admin')
+  const inAdminArea = pathname.startsWith('/admin')
 
   const [mounted, setMounted] = useState(false)
   const [user, setUser] = useState<Me>(null)
@@ -25,6 +25,7 @@ export default function HeaderActions() {
   const btnRef = useRef<HTMLButtonElement>(null)
   const menuRef = useRef<HTMLDivElement>(null)
 
+  // Evitar mismatch
   useEffect(() => setMounted(true), [])
 
   // Cargar sesión
@@ -67,9 +68,9 @@ export default function HeaderActions() {
     window.location.href = '/'
   }
 
-  // En admin no mostramos acciones de cliente
-  if (isAdmin) return null
-  if (!mounted) return <div className="w-[200px] h-8" />
+  // En el layout /admin ocultamos acciones de cliente
+  if (inAdminArea) return null
+  if (!mounted) return <div className="w-[240px] h-8" />
 
   // Avatar con iniciales
   const initials =
@@ -80,9 +81,23 @@ export default function HeaderActions() {
       ?.map((s) => s[0]?.toUpperCase() || '')
       ?.join('') || 'US'
 
+  const isAdmin = user?.role === 'ADMIN'
+
   return (
     <div className="flex items-center gap-3">
       <CartDrawer />
+
+      {/* Botón rápido al panel admin (sólo admins) */}
+      {isAdmin && (
+        <Link
+          href="/admin/productos"
+          className="hidden sm:inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-3 py-1 text-sm text-white hover:bg-white/15"
+          aria-label="Ir al panel de administración"
+          title="Panel Admin"
+        >
+          🛠️ Admin
+        </Link>
+      )}
 
       {user ? (
         <div className="relative">
@@ -97,7 +112,7 @@ export default function HeaderActions() {
             }}
             aria-haspopup="menu"
             aria-expanded={open}
-            className="flex items-center gap-2 rounded-full border px-2 py-1 hover:bg-gray-50 transition bg-white/10"
+            className="flex items-center gap-2 rounded-full border border-white/40 px-2 py-1 hover:bg-white/10 transition bg-white/10"
           >
             <span
               className="inline-flex items-center justify-center w-8 h-8 rounded-full text-white font-semibold text-sm shadow-sm"
@@ -105,6 +120,7 @@ export default function HeaderActions() {
                 background:
                   'linear-gradient(135deg, #8b0000 0%, #b22222 50%, #d32f2f 100%)',
               }}
+              aria-hidden
             >
               {initials}
             </span>
@@ -115,6 +131,7 @@ export default function HeaderActions() {
               className={`w-4 h-4 text-white/80 transition ${open ? 'rotate-180' : ''}`}
               viewBox="0 0 20 20"
               fill="currentColor"
+              aria-hidden
             >
               <path
                 fillRule="evenodd"
@@ -128,7 +145,7 @@ export default function HeaderActions() {
             <div
               ref={menuRef}
               role="menu"
-              // 👇 Forzamos color de texto oscuro para que no herede el text-white del header
+              // Forzamos texto oscuro para no heredar el text-white del header
               className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white text-gray-900 shadow-lg overflow-hidden z-50"
             >
               <div className="px-4 py-3 border-b border-gray-100">
@@ -137,6 +154,17 @@ export default function HeaderActions() {
               </div>
 
               <nav className="py-1 text-sm">
+                {/* Enlace admin dentro del menú (sólo admins) */}
+                {isAdmin && (
+                  <Link
+                    href="/admin/productos"
+                    className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    onClick={() => setOpen(false)}
+                  >
+                    <span>🛠️</span> Panel Admin
+                  </Link>
+                )}
+
                 <Link
                   href="/cuenta"
                   className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-50"
@@ -169,6 +197,7 @@ export default function HeaderActions() {
     </div>
   )
 }
+
 
 
 
