@@ -18,14 +18,11 @@ type Row = {
   notes:string|null
 }
 
-// jfetch robusto: no intenta res.json() si no hay JSON y eleva un Error con mensaje útil
+// jfetch robusto: si no hay JSON no rompe; si hay error eleva mensaje útil
 async function jfetch<T>(url:string, init?:RequestInit): Promise<T> {
   const res = await fetch(url, { ...init, cache: 'no-store' })
-
-  // intenta parsear json si viene, pero no lo exigimos
   let json: any = null
-  try { json = await res.json() } catch (_) { /* puede venir vacío en errores viejos */ }
-
+  try { json = await res.json() } catch {}
   if (!res.ok || (json && json.ok === false)) {
     const msg = json?.message || `HTTP ${res.status}`
     throw new Error(msg)
@@ -41,6 +38,7 @@ export default function AdminCompatibilidad() {
   const [models, setModels] = useState<Model[]>([])
   const [variants, setVariants] = useState<Variant[]>([])
 
+  // Form "Agregar"
   const [makeName, setMakeName] = useState('')
   const [modelName, setModelName] = useState('')
   const [year, setYear] = useState<number | ''>('')
@@ -50,6 +48,15 @@ export default function AdminCompatibilidad() {
 
   const [rows, setRows] = useState<Row[]>([])
   const [loading, setLoading] = useState(false)
+
+  // ====== Estados de EDICIÓN inline ======
+  const [editingId, setEditingId] = useState<number | null>(null)
+  const [editMake, setEditMake] = useState('')
+  const [editModel, setEditModel] = useState('')
+  const [editYear, setEditYear] = useState<number | ''>('')
+  const [editEngine, setEditEngine] = useState('')
+  const [editBody, setEditBody] = useState('')
+  const [editNotes, setEditNotes] = useState('')
 
   // cargar catálogos base
   useEffect(() => {
@@ -90,61 +97,49 @@ export default function AdminCompatibilidad() {
     setVariants(res.variants)
   }
 
-  // Reemplaza COMPLETO tu addFitment por este
-async function addFitment(e: React.FormEvent) {
-  e.preventDefault();
+  // ====== Agregar ======
+  async function addFitment(e: React.FormEvent) {
+    e.preventDefault()
+    const pid = Number(productId)
+    const mk  = (makeName ?? '').trim()
+    const md  = (modelName ?? '').trim()
+    const yr  = Number(year)
+    const eng = (engine ?? '').trim()
+    const bod = (body ?? '').trim()
+    const nts = (notes ?? '').trim()
 
-  // Normaliza todos los campos desde tu estado actual
-  const pid = Number(productId);
-  const mk  = (makeName ?? '').trim();
-  const md  = (modelName ?? '').trim();
-  const yr  = Number(year);
-  const eng = (engine ?? '').trim();
-  const bod = (body ?? '').trim();
-  const nts = (notes ?? '').trim();
-
-  // Validación en cliente
-  if (!Number.isFinite(pid) || !pid || !mk || !md || !Number.isFinite(yr)) {
-    alert('Faltan campos requeridos');
-    return;
-  }
-
-  // Arma payload: solo manda opcionales si traen texto
-  const payload: any = { productId: pid, makeName: mk, modelName: md, year: yr };
-  if (eng) payload.engine = eng;
-  if (bod) payload.body   = bod;
-  if (nts) payload.notes  = nts;
-
-  try {
-    const res = await fetch('/api/admin/fitments/add', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-
-    if (!res.ok) {
-      let msg = 'Error';
-      try {
-        const j = await res.json();
-        msg = j?.message || msg;
-      } catch {
-        msg = `${msg} (HTTP ${res.status})`;
-      }
-      alert(msg);
-      return;
+    if (!Number.isFinite(pid) || !pid || !mk || !md || !Number.isFinite(yr)) {
+      alert('Faltan campos requeridos')
+      return
     }
 
-    // Refresca tabla y limpia notas
-    const list = await jfetch<{ ok: true; rows: Row[] }>(
-      `/api/admin/fitments/list?productId=${pid}`
-    );
-    setRows(list.rows);
-    setNotes('');
-  } catch (err: any) {
-    alert(err?.message || 'Error al agregar compatibilidad');
-  }
-}
+    const payload: any = { productId: pid, makeName: mk, modelName: md, year: yr }
+    if (eng) payload.engine = eng
+    if (bod) payload.body   = bod
+    if (nts) payload.notes  = nts
 
+    try {
+      const res = await fetch('/api/admin/fitments/add', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      if (!res.ok) {
+        let msg = 'Error'
+        try { const j = await res.json(); msg = j?.message || msg } catch { msg = `${msg} (HTTP ${res.status})` }
+        alert(msg)
+        return
+      }
+
+      await reloadCurrent()
+      setNotes('')
+    } catch (err:any) {
+      alert(err?.message || 'Error al agregar compatibilidad')
+    }
+  }
+
+  // ====== Eliminar ======
   async function removeFitment(id:number) {
     try {
       await jfetch('/api/admin/fitments/remove', {
@@ -153,8 +148,62 @@ async function addFitment(e: React.FormEvent) {
         body: JSON.stringify({ fitmentId: id }),
       })
       setRows(rows => rows.filter(r => r.id !== id))
+      if (editingId === id) cancelEdit()
     } catch (err:any) {
       alert(err?.message || 'Error al eliminar compatibilidad')
+    }
+  }
+
+  // ====== Editar (UI) ======
+  function startEdit(r: Row) {
+    setEditingId(r.id)
+    setEditMake(r.variant.model.make.name)
+    setEditModel(r.variant.model.name)
+    setEditYear(r.variant.year)
+    setEditEngine(r.variant.engine ?? '')
+    setEditBody(r.variant.body ?? '')
+    setEditNotes(r.notes ?? '')
+  }
+  function cancelEdit() {
+    setEditingId(null)
+    setEditMake('')
+    setEditModel('')
+    setEditYear('')
+    setEditEngine('')
+    setEditBody('')
+    setEditNotes('')
+  }
+
+  // ====== Guardar edición ======
+  async function saveEdit() {
+    if (!editingId) return
+    const payload: any = { fitmentId: editingId, notes: (editNotes ?? '').trim() }
+
+    // Si completan marca/modelo/año, también reasignamos variante
+    const mk = (editMake ?? '').trim()
+    const md = (editModel ?? '').trim()
+    const yr = Number(editYear)
+    const eng = (editEngine ?? '').trim()
+    const bod = (editBody ?? '').trim()
+
+    if (mk && md && Number.isFinite(yr)) {
+      payload.makeName = mk
+      payload.modelName = md
+      payload.year = yr
+      if (eng) payload.engine = eng
+      if (bod) payload.body = bod
+    }
+
+    try {
+      await jfetch('/api/admin/fitments/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      await reloadCurrent()
+      cancelEdit()
+    } catch (err:any) {
+      alert(err?.message || 'Error al actualizar compatibilidad')
     }
   }
 
@@ -321,20 +370,52 @@ async function addFitment(e: React.FormEvent) {
               <tbody>
                 {rows.map(r => (
                   <tr key={r.id} className="border-b last:border-0">
-                    <td className="py-2 pr-4">{r.variant.model.make.name}</td>
-                    <td className="py-2 pr-4">{r.variant.model.name}</td>
-                    <td className="py-2 pr-4">{r.variant.year}</td>
-                    <td className="py-2 pr-4">{r.variant.engine ?? '—'}</td>
-                    <td className="py-2 pr-4">{r.variant.body ?? '—'}</td>
-                    <td className="py-2 pr-4">{r.notes ?? '—'}</td>
-                    <td className="py-2 pr-4">
-                      <button
-                        onClick={() => removeFitment(r.id)}
-                        className="text-rose-700 hover:underline"
-                      >
-                        Eliminar
-                      </button>
-                    </td>
+                    {editingId === r.id ? (
+                      <>
+                        <td className="py-2 pr-4">
+                          <input className="border rounded px-2 py-1 w-28"
+                                 value={editMake} onChange={e => setEditMake(e.target.value)} />
+                        </td>
+                        <td className="py-2 pr-4">
+                          <input className="border rounded px-2 py-1 w-28"
+                                 value={editModel} onChange={e => setEditModel(e.target.value)} />
+                        </td>
+                        <td className="py-2 pr-4">
+                          <input type="number" className="border rounded px-2 py-1 w-20"
+                                 value={editYear}
+                                 onChange={e => setEditYear(e.target.value ? Number(e.target.value) : '')} />
+                        </td>
+                        <td className="py-2 pr-4">
+                          <input className="border rounded px-2 py-1 w-24"
+                                 value={editEngine} onChange={e => setEditEngine(e.target.value)} />
+                        </td>
+                        <td className="py-2 pr-4">
+                          <input className="border rounded px-2 py-1 w-24"
+                                 value={editBody} onChange={e => setEditBody(e.target.value)} />
+                        </td>
+                        <td className="py-2 pr-4">
+                          <input className="border rounded px-2 py-1 w-40"
+                                 value={editNotes} onChange={e => setEditNotes(e.target.value)} />
+                        </td>
+                        <td className="py-2 pr-4 flex gap-2">
+                          <button onClick={saveEdit} className="text-emerald-700 hover:underline">Guardar</button>
+                          <button onClick={cancelEdit} className="text-gray-600 hover:underline">Cancelar</button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="py-2 pr-4">{r.variant.model.make.name}</td>
+                        <td className="py-2 pr-4">{r.variant.model.name}</td>
+                        <td className="py-2 pr-4">{r.variant.year}</td>
+                        <td className="py-2 pr-4">{r.variant.engine ?? '—'}</td>
+                        <td className="py-2 pr-4">{r.variant.body ?? '—'}</td>
+                        <td className="py-2 pr-4">{r.notes ?? '—'}</td>
+                        <td className="py-2 pr-4 flex gap-3">
+                          <button onClick={() => startEdit(r)} className="text-blue-700 hover:underline">Editar</button>
+                          <button onClick={() => removeFitment(r.id)} className="text-rose-700 hover:underline">Eliminar</button>
+                        </td>
+                      </>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -345,4 +426,5 @@ async function addFitment(e: React.FormEvent) {
     </main>
   )
 }
+
 
