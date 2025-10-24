@@ -8,15 +8,29 @@ type Model = { id:number; name:string; makeId:number }
 type Variant = { id:number; year:number; engine:string|null; body:string|null }
 type Row = {
   id:number
-  variant:{ id:number; year:number; engine:string|null; body:string|null; model:{ name:string; make:{ name:string } } }
+  variant:{
+    id:number
+    year:number
+    engine:string|null
+    body:string|null
+    model:{ name:string; make:{ name:string } }
+  }
   notes:string|null
 }
 
+// jfetch robusto: no intenta res.json() si no hay JSON y eleva un Error con mensaje útil
 async function jfetch<T>(url:string, init?:RequestInit): Promise<T> {
-  const res = await fetch(url, { ...init, cache:'no-store' })
-  const json = await res.json()
-  if (!res.ok || !json?.ok) throw new Error(json?.message || 'Error')
-  return json
+  const res = await fetch(url, { ...init, cache: 'no-store' })
+
+  // intenta parsear json si viene, pero no lo exigimos
+  let json: any = null
+  try { json = await res.json() } catch (_) { /* puede venir vacío en errores viejos */ }
+
+  if (!res.ok || (json && json.ok === false)) {
+    const msg = json?.message || `HTTP ${res.status}`
+    throw new Error(msg)
+  }
+  return (json ?? ({} as T)) as T
 }
 
 export default function AdminCompatibilidad() {
@@ -40,60 +54,114 @@ export default function AdminCompatibilidad() {
   // cargar catálogos base
   useEffect(() => {
     (async () => {
-      const p = await jfetch<{ok:true, products:Product[]}>('/api/admin/fitments/options?scope=products')
-      const m = await jfetch<{ok:true, makes:Make[]}>('/api/admin/fitments/options?scope=makes')
+      const p = await jfetch<{ ok:true; products:Product[] }>('/api/admin/fitments/options?scope=products')
+      const m = await jfetch<{ ok:true; makes:Make[] }>('/api/admin/fitments/options?scope=makes')
       setProducts(p.products)
       setMakes(m.makes)
-    })()
+    })().catch(err => alert(err.message))
   }, [])
+
+  // helper para recargar la tabla del producto actual
+  async function reloadCurrent() {
+    if (!productId) { setRows([]); return }
+    const list = await jfetch<{ ok:true; rows:Row[] }>(`/api/admin/fitments/list?productId=${productId}`)
+    setRows(list.rows)
+  }
 
   useEffect(() => {
     if (!productId) { setRows([]); return }
-    (async () => {
-      setLoading(true)
-      try {
-        const list = await jfetch<{ok:true, rows:Row[]}>(`/api/admin/fitments/list?productId=${productId}`)
-        setRows(list.rows)
-      } finally { setLoading(false) }
-    })()
+    setLoading(true)
+    reloadCurrent()
+      .catch(err => alert(err.message))
+      .finally(() => setLoading(false))
   }, [productId])
 
   // Cuando el admin selecciona una marca existente, precarga modelos
   async function loadModels(makeId:number) {
-    const res = await jfetch<{ok:true, models:Model[]}>('/api/admin/fitments/options?scope=models&makeId='+makeId)
+    const res = await jfetch<{ ok:true; models:Model[] }>(
+      '/api/admin/fitments/options?scope=models&makeId=' + makeId
+    )
     setModels(res.models)
   }
   async function loadVariants(modelId:number) {
-    const res = await jfetch<{ok:true, variants:Variant[]}>('/api/admin/fitments/options?scope=variants&modelId='+modelId)
+    const res = await jfetch<{ ok:true; variants:Variant[] }>(
+      '/api/admin/fitments/options?scope=variants&modelId=' + modelId
+    )
     setVariants(res.variants)
   }
 
-  // Submit agregar
-  async function addFitment(e:React.FormEvent) {
-    e.preventDefault()
-    if (!productId || !makeName || !modelName || !year) return
+  // Reemplaza COMPLETO tu addFitment por este
+async function addFitment(e: React.FormEvent) {
+  e.preventDefault();
 
-    await jfetch('/api/admin/fitments/add', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ productId, makeName, modelName, year, engine: engine || null, body: body || null, notes: notes || null })
-    })
-    // refrescar
-    const list = await jfetch<{ok:true, rows:Row[]}>(`/api/admin/fitments/list?productId=${productId}`)
-    setRows(list.rows)
-    setNotes('')
+  // Normaliza todos los campos desde tu estado actual
+  const pid = Number(productId);
+  const mk  = (makeName ?? '').trim();
+  const md  = (modelName ?? '').trim();
+  const yr  = Number(year);
+  const eng = (engine ?? '').trim();
+  const bod = (body ?? '').trim();
+  const nts = (notes ?? '').trim();
+
+  // Validación en cliente
+  if (!Number.isFinite(pid) || !pid || !mk || !md || !Number.isFinite(yr)) {
+    alert('Faltan campos requeridos');
+    return;
   }
+
+  // Arma payload: solo manda opcionales si traen texto
+  const payload: any = { productId: pid, makeName: mk, modelName: md, year: yr };
+  if (eng) payload.engine = eng;
+  if (bod) payload.body   = bod;
+  if (nts) payload.notes  = nts;
+
+  try {
+    const res = await fetch('/api/admin/fitments/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      let msg = 'Error';
+      try {
+        const j = await res.json();
+        msg = j?.message || msg;
+      } catch {
+        msg = `${msg} (HTTP ${res.status})`;
+      }
+      alert(msg);
+      return;
+    }
+
+    // Refresca tabla y limpia notas
+    const list = await jfetch<{ ok: true; rows: Row[] }>(
+      `/api/admin/fitments/list?productId=${pid}`
+    );
+    setRows(list.rows);
+    setNotes('');
+  } catch (err: any) {
+    alert(err?.message || 'Error al agregar compatibilidad');
+  }
+}
 
   async function removeFitment(id:number) {
-    await jfetch('/api/admin/fitments/remove', {
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({ fitmentId: id })
-    })
-    setRows(rows => rows.filter(r => r.id !== id))
+    try {
+      await jfetch('/api/admin/fitments/remove', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ fitmentId: id }),
+      })
+      setRows(rows => rows.filter(r => r.id !== id))
+    } catch (err:any) {
+      alert(err?.message || 'Error al eliminar compatibilidad')
+    }
   }
 
-  const selectedProduct = useMemo(() => products.find(p => p.id === productId), [products, productId])
+  const selectedProduct = useMemo(
+    () => products.find(p => p.id === productId),
+    [products, productId]
+  )
 
   return (
     <main className="max-w-6xl mx-auto p-6 space-y-6">
@@ -136,9 +204,9 @@ export default function AdminCompatibilidad() {
               onChange={e => {
                 setMakeName(e.target.value)
                 const found = makes.find(m => m.name.toLowerCase() === e.target.value.toLowerCase())
-                if (found) loadModels(found.id)
+                if (found) loadModels(found.id).catch(err => alert(err.message))
               }}
-              placeholder="Ej: Nissan"
+              placeholder="Ej: Toyota"
             />
             <datalist id="dlist-makes">
               {makes.map(m => <option key={m.id} value={m.name} />)}
@@ -156,11 +224,17 @@ export default function AdminCompatibilidad() {
                 setModelName(e.target.value)
                 const mk = makes.find(m => m.name.toLowerCase() === makeName.toLowerCase())
                 if (mk) {
-                  const res = await jfetch<{ok:true, models:Model[]}>('/api/admin/fitments/options?scope=models&makeId='+mk.id)
-                  setModels(res.models)
+                  try {
+                    const res = await jfetch<{ ok:true; models:Model[] }>(
+                      '/api/admin/fitments/options?scope=models&makeId=' + mk.id
+                    )
+                    setModels(res.models)
+                  } catch (err:any) {
+                    alert(err.message)
+                  }
                 }
               }}
-              placeholder="Ej: Versa"
+              placeholder="Ej: RAV 4"
             />
             <datalist id="dlist-models">
               {models.map(m => <option key={m.id} value={m.name} />)}
@@ -184,17 +258,32 @@ export default function AdminCompatibilidad() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium">Motor (opcional)</label>
-              <input className="border rounded-lg px-3 py-2 w-full" value={engine} onChange={e => setEngine(e.target.value)} placeholder="1.6L"/>
+              <input
+                className="border rounded-lg px-3 py-2 w-full"
+                value={engine}
+                onChange={e => setEngine(e.target.value)}
+                placeholder="1.6L"
+              />
             </div>
             <div>
               <label className="block text-sm font-medium">Carrocería (opcional)</label>
-              <input className="border rounded-lg px-3 py-2 w-full" value={body} onChange={e => setBody(e.target.value)} placeholder="Sedan"/>
+              <input
+                className="border rounded-lg px-3 py-2 w-full"
+                value={body}
+                onChange={e => setBody(e.target.value)}
+                placeholder="Sedan / SUV"
+              />
             </div>
           </div>
 
           <div className="md:col-span-2">
             <label className="block text-sm font-medium">Notas (opcional)</label>
-            <input className="border rounded-lg px-3 py-2 w-full" value={notes} onChange={e => setNotes(e.target.value)} placeholder="OEM 16546-ED500"/>
+            <input
+              className="border rounded-lg px-3 py-2 w-full"
+              value={notes}
+              onChange={e => setNotes(e.target.value)}
+              placeholder="OEM 16546-ED500"
+            />
           </div>
 
           <div className="md:col-span-2">
@@ -211,7 +300,9 @@ export default function AdminCompatibilidad() {
       {/* Tabla de fitments */}
       <section className="rounded-xl border p-4 bg-white/80">
         <h2 className="font-semibold mb-3">Compatibilidades del producto</h2>
-        {loading ? <div>Cargando…</div> : rows.length === 0 ? (
+        {loading ? (
+          <div>Cargando…</div>
+        ) : rows.length === 0 ? (
           <div className="text-sm text-gray-600">Sin registros.</div>
         ) : (
           <div className="overflow-x-auto">
@@ -237,7 +328,10 @@ export default function AdminCompatibilidad() {
                     <td className="py-2 pr-4">{r.variant.body ?? '—'}</td>
                     <td className="py-2 pr-4">{r.notes ?? '—'}</td>
                     <td className="py-2 pr-4">
-                      <button onClick={() => removeFitment(r.id)} className="text-rose-700 hover:underline">
+                      <button
+                        onClick={() => removeFitment(r.id)}
+                        className="text-rose-700 hover:underline"
+                      >
                         Eliminar
                       </button>
                     </td>
@@ -251,3 +345,4 @@ export default function AdminCompatibilidad() {
     </main>
   )
 }
+
