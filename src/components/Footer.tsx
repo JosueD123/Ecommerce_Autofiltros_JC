@@ -84,7 +84,7 @@ export default function Footer() {
             <li>
               Email:{' '}
               <a href="mailto:ventas@autofiltrosjc.com" className="underline hover:text-[#b71c1c]">
-                ventas@autofiltrosjc.com
+                ventas@grupojcautomotriz.com
               </a>
             </li>
             <li>Horario: Lun–Sáb 8:00–18:00</li>
