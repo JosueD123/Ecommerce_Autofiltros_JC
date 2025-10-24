@@ -158,16 +158,15 @@ model VehicleModel {
 model VehicleVariant {
   id      Int          @id @default(autoincrement())
   year    Int
-  engine  String?
-  body    String?
+  engine  String       @default("")   // <— antes era String?
+  body    String       @default("")   // <— antes era String?
   modelId Int
   model   VehicleModel @relation(fields: [modelId], references: [id])
 
   fitments ProductFitment[]
 
-  @@index([modelId, year])
-  // ⬇️ NUEVO: clave única compuesta que usaremos en upsert
   @@unique([modelId, year, engine, body], name: "modelId_year_engine_body")
+  @@index([modelId, year])
 }
 
 
