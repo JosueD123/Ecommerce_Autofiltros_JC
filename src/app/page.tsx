@@ -334,7 +334,7 @@ export default function Home() {
             </div>
             <div className="rounded-xl border bg-white p-4">
               <div className="font-medium">Email</div>
-              <div className="text-gray-700">ventas@autofiltrosjc.com</div>
+              <div className="text-gray-700">ventas@grupojcautomotriz.com</div>
             </div>
             <div className="rounded-xl border bg-white p-4">
               <div className="font-medium">Horario</div>

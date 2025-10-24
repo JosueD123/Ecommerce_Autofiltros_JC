@@ -95,7 +95,7 @@ export default function ContactoPage() {
           </div>
           <div>
             <div className="font-semibold">Email</div>
-            <a className="underline" href="mailto:ventas@autofiltrosjc.com">ventas@autofiltrosjc.com</a>
+            <a className="underline" href="mailto:ventas@grupojcautomotriz.com">ventas@grupojcautomotriz.com</a>
           </div>
           <div>
             <div className="font-semibold">Horario</div>
@@ -106,3 +106,4 @@ export default function ContactoPage() {
     </main>
   )
 }
+

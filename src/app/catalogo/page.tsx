@@ -189,7 +189,7 @@ export default async function Catalogo({ searchParams }: { searchParams: Promise
       </a>
       <br />
       <a href="mailto:ventas@autofiltrosjc.com" className="underline">
-        ventas@autofiltrosjc.com
+        ventas@grupojcautomotriz.com
       </a>
     </div>
   </div>
