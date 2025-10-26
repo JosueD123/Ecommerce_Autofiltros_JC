@@ -1,4 +1,5 @@
 'use client'
+
 import { useCart } from '@/store/cart'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -12,7 +13,7 @@ export default function CartDrawer() {
   const [open, setOpen] = useState(false)
   const { show } = useToast()
 
-  // ✅ los hooks van arriba; este early-return no rompe reglas
+  // No mostrar carrito en secciones de Admin
   if (isAdmin) return null
 
   const subtotal = useMemo(
@@ -20,21 +21,27 @@ export default function CartDrawer() {
     [items]
   )
 
-  // bloquear scroll y cerrar con ESC
+  // Bloquear scroll del documento y cerrar con ESC
   useEffect(() => {
-    if (!open) { document.body.style.overflow = ''; return }
-    document.body.style.overflow = 'hidden'
+    const root = document.documentElement
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    window.addEventListener('keydown', onKey)
-    return () => {
+
+    if (open) {
+      root.style.overflow = 'hidden'
+      window.addEventListener('keydown', onKey)
+    } else {
+      root.style.overflow = ''
       window.removeEventListener('keydown', onKey)
-      document.body.style.overflow = ''
+    }
+    return () => {
+      root.style.overflow = ''
+      window.removeEventListener('keydown', onKey)
     }
   }, [open])
 
   return (
     <>
-      {/* Botón carrito */}
+      {/* Botón del carrito en el header */}
       <button
         onClick={() => setOpen(true)}
         className="relative rounded-lg border px-3 py-1.5 text-sm hover:bg-gray-50"
@@ -47,35 +54,43 @@ export default function CartDrawer() {
         )}
       </button>
 
-      {/* Overlay */}
-      {open && (
-        <div
-          onClick={() => setOpen(false)}
-          className="fixed inset-0 z-40 bg-black/60"
-          aria-hidden="true"
-        />
-      )}
+      {/* Overlay (siempre montado para animación; sin eventos cuando está cerrado) */}
+      <div
+        onClick={() => setOpen(false)}
+        aria-hidden="true"
+        className={`fixed inset-0 z-40 bg-black/60 transition-opacity
+          ${open ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`}
+      />
 
-      {/* Drawer */}
+      {/* Drawer fijo: no ensancha la página y no “se queda” al hacer scroll horizontal */}
       <aside
-        onClick={(e) => e.stopPropagation()}
-        className={`fixed top-0 right-0 z-50 h-dvh w-full sm:w-[420px]
-        bg-white text-gray-900 flex flex-col shadow-2xl ring-1 ring-black/5 border-l
-        transform transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'}`}
-        aria-label="Carrito de compras"
         role="dialog"
         aria-modal="true"
+        aria-label="Carrito de compras"
+        className={`fixed inset-y-0 right-0 z-50 h-dvh w-full sm:w-[420px] bg-white text-gray-900
+          flex flex-col shadow-2xl ring-1 ring-black/5 border-l
+          transition-transform duration-300 will-change-transform
+          ${open ? 'translate-x-0' : 'translate-x-full pointer-events-none'}`}
       >
         <header className="h-14 px-5 border-b flex items-center justify-between">
           <h2 className="text-base font-semibold">Carrito de compras</h2>
-          <button onClick={() => setOpen(false)} className="text-gray-600 hover:text-black" aria-label="Cerrar">×</button>
+          <button
+            onClick={() => setOpen(false)}
+            className="text-gray-600 hover:text-black"
+            aria-label="Cerrar"
+          >
+            ×
+          </button>
         </header>
 
-        {/* Lista con scroll */}
+        {/* Lista con scroll vertical interno */}
         <div className="flex-1 min-h-0 overflow-y-auto px-5 py-4">
           {items.length === 0 ? (
             <p className="text-sm text-gray-700">
-              Tu carrito está vacío. <Link href="/catalogo" className="underline">Ver catálogo</Link>
+              Tu carrito está vacío.{' '}
+              <Link href="/catalogo" onClick={() => setOpen(false)} className="underline">
+                Ver catálogo
+              </Link>
             </p>
           ) : (
             <ul className="divide-y divide-gray-200">
@@ -93,7 +108,13 @@ export default function CartDrawer() {
                     <div className="min-w-0">
                       <div className="text-sm font-medium leading-5 line-clamp-2">{i.name}</div>
                       <div className="mt-1 inline-flex items-center gap-2">
-                        <button onClick={() => dec(i.id)} className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50" aria-label="Disminuir">–</button>
+                        <button
+                          onClick={() => dec(i.id)}
+                          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50"
+                          aria-label="Disminuir"
+                        >
+                          –
+                        </button>
                         <input
                           value={i.qty}
                           onChange={(e) => {
@@ -104,15 +125,26 @@ export default function CartDrawer() {
                           className="w-12 h-8 border rounded-full text-center text-sm"
                           aria-label="Cantidad"
                         />
-                        <button onClick={() => inc(i.id)} className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50" aria-label="Aumentar">+</button>
+                        <button
+                          onClick={() => inc(i.id)}
+                          className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-50"
+                          aria-label="Aumentar"
+                        >
+                          +
+                        </button>
                       </div>
                       <div className="mt-1 text-xs text-gray-600">Q {i.price.toFixed(2)} c/u</div>
                     </div>
 
                     <div className="text-right">
-                      <div className="text-sm font-semibold">Q {(i.price * i.qty).toFixed(2)}</div>
+                      <div className="text-sm font-semibold">
+                        Q {(i.price * i.qty).toFixed(2)}
+                      </div>
                       <button
-                        onClick={() => { remove(i.id); show({ title: 'Quitado del carrito', desc: i.name }) }}
+                        onClick={() => {
+                          remove(i.id)
+                          show({ title: 'Quitado del carrito', desc: i.name })
+                        }}
                         className="mt-2 text-xs text-red-600 hover:underline"
                       >
                         Quitar
@@ -139,7 +171,10 @@ export default function CartDrawer() {
             Proceder al pago
           </Link>
           <button
-            onClick={() => { clear(); show({ title: 'Carrito vacío' }) }}
+            onClick={() => {
+              clear()
+              show({ title: 'Carrito vacío' })
+            }}
             className="mt-3 w-full rounded-full py-3 border hover:bg-gray-50"
           >
             Vaciar carrito
@@ -149,5 +184,6 @@ export default function CartDrawer() {
     </>
   )
 }
+
 
 
