@@ -1,6 +1,7 @@
 import ProductCard from '@/components/ProductCard'
 import FilterChips from '@/components/FilterChips'
 import SortSelect from '@/components/SortSelect'
+import SidebarBrandTrust from '@/components/SidebarBrandTrust' // ⬅️ NUEVO
 import { prisma } from '@/lib/prisma'
 
 type SP = { q?: string; marca?: string; categoria?: string; sort?: string; page?: string }
@@ -137,63 +138,56 @@ export default async function Catalogo({ searchParams }: { searchParams: Promise
           </div>
         </details>
 
-        {/* --- Extras para ocupar el espacio y aportar valor --- */}
-<div className="space-y-3 pt-2">
-  {/* Ayuda / WhatsApp */}
-  <div className="rounded-2xl border bg-white/80 p-4">
-    <div className="text-sm font-semibold flex items-center gap-2">
-      🧑‍🔧 ¿Necesitas ayuda?
-    </div>
-    <p className="text-xs text-gray-600 mt-1">
-      Te apoyamos a elegir el filtro correcto o validar compatibilidad.
-    </p>
-    <a
-      href="https://wa.me/50244984479?text=Hola%20Autofiltros%20JC%2C%20necesito%20ayuda%20con%20un%20filtro."
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mt-3 inline-flex items-center justify-center w-full rounded-lg bg-emerald-600 text-white text-sm py-2 hover:opacity-90"
-    >
-      💬 Chatear por WhatsApp
-    </a>
-  </div>
+        {/* Extras actuales */}
+        <div className="space-y-3 pt-2">
+          {/* Ayuda / WhatsApp */}
+          <div className="rounded-2xl border bg-white/80 p-4">
+            <div className="text-sm font-semibold flex items-center gap-2">🧑‍🔧 ¿Necesitas ayuda?</div>
+            <p className="text-xs text-gray-600 mt-1">
+              Te apoyamos a elegir el filtro correcto o validar compatibilidad.
+            </p>
+            <a
+              href="https://wa.me/50244984479?text=Hola%20Autofiltros%20JC%2C%20necesito%20ayuda%20con%20un%20filtro."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 inline-flex items-center justify-center w-full rounded-lg bg-emerald-600 text-white text-sm py-2 hover:opacity-90"
+            >
+              💬 Chatear por WhatsApp
+            </a>
+          </div>
 
-  {/* Envíos */}
-  <div className="rounded-2xl border bg-white/80 p-4">
-    <div className="text-sm font-semibold flex items-center gap-2">
-      🚚 Envíos a todo el país
-    </div>
-    <p className="text-xs text-gray-600 mt-1">
-      Trabajamos con aliados logísticos. Entregas ágiles y seguimiento.
-    </p>
-  </div>
+          {/* Envíos */}
+          <div className="rounded-2xl border bg-white/80 p-4">
+            <div className="text-sm font-semibold flex items-center gap-2">🚚 Envíos a todo el país</div>
+            <p className="text-xs text-gray-600 mt-1">
+              Trabajamos con aliados logísticos. Entregas ágiles y seguimiento.
+            </p>
+          </div>
 
-  {/* Pago seguro */}
-  <div className="rounded-2xl border bg-white/80 p-4">
-    <div className="text-sm font-semibold flex items-center gap-2">
-      💳 Pago seguro
-    </div>
-    <p className="text-xs text-gray-600 mt-1">
-      Stripe en modo test y métodos locales próximamente.
-    </p>
-  </div>
+          {/* Pago seguro */}
+          <div className="rounded-2xl border bg-white/80 p-4">
+            <div className="text-sm font-semibold flex items-center gap-2">💳 Pago seguro</div>
+            <p className="text-xs text-gray-600 mt-1">Stripe en modo test y métodos locales próximamente.</p>
+          </div>
 
-  {/* Horario */}
-  <div className="rounded-2xl border bg-white/80 p-4">
-    <div className="text-sm font-semibold flex items-center gap-2">
-      🕘 Horario
-    </div>
-    <p className="text-xs text-gray-600 mt-1">Lun–Sáb 8:00–18:00</p>
-    <div className="mt-2 text-xs">
-      <a href="tel:+50244984479" className="underline">
-        Tel: +502 4498 4479
-      </a>
-      <br />
-      <a href="mailto:ventas@autofiltrosjc.com" className="underline">
-        ventas@grupojcautomotriz.com
-      </a>
-    </div>
-  </div>
-</div>
+          {/* Horario */}
+          <div className="rounded-2xl border bg-white/80 p-4">
+            <div className="text-sm font-semibold flex items-center gap-2">🕘 Horario</div>
+            <p className="text-xs text-gray-600 mt-1">Lun–Sáb 8:00–18:00</p>
+            <div className="mt-2 text-xs">
+              <a href="tel:+50244984479" className="underline">
+                Tel: +502 4498 4479
+              </a>
+              <br />
+              <a href="mailto:ventas@autofiltrosjc.com" className="underline">
+                ventas@grupojcautomotriz.com
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* ✅ NUEVO: Marcas destacadas + Confianza */}
+        <SidebarBrandTrust />
       </aside>
 
       {/* CONTENIDO */}
@@ -233,9 +227,7 @@ export default async function Catalogo({ searchParams }: { searchParams: Promise
           <div className="rounded-2xl border p-8 bg-white/70 text-center">
             <div className="text-3xl mb-2">🔎</div>
             <div className="font-medium">No encontramos resultados</div>
-            <p className="text-sm text-gray-600 mt-1">
-              Intenta con otro término, o limpia los filtros.
-            </p>
+            <p className="text-sm text-gray-600 mt-1">Intenta con otro término, o limpia los filtros.</p>
             <a
               href={linkWith({ q: undefined, marca: undefined, categoria: undefined, page: 1 })}
               className="inline-block mt-4 text-sm px-4 py-2 rounded-lg border hover:bg-gray-50"
@@ -280,6 +272,7 @@ export default async function Catalogo({ searchParams }: { searchParams: Promise
     </main>
   )
 }
+
 
 
 
