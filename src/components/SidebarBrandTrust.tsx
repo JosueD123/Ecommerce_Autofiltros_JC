@@ -8,6 +8,7 @@ const BRANDS: Brand[] = [
   { name: 'Kayser',    logo: '/brands/kayser.png' },
   { name: 'A1',    logo: '/brands/a1.png' },
   { name: 'Seineca',   logo: '/brands/seineca.png' },
+  { name: 'Top Gear',   logo: '/brands/top-gear.png' },
 ]
 
 export default function SidebarBrandTrust() {
