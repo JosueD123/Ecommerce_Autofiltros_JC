@@ -34,27 +34,36 @@ export default async function MarcasPage({ searchParams }: { searchParams: Promi
       <section className="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {brands.map((b) => (
           <Link
-            key={b.id}
-            href={`/catalogo?marca=${b.id}`}
-            className="group rounded-2xl border bg-white/80 p-4 hover:shadow-sm transition"
-          >
-            <div className="flex items-center gap-3">
-              {/* ✅ Logo con soporte png/jpg/jpeg y fallback de iniciales */}
-              <BrandLogo
-                name={b.name}
-                // @ts-expect-error si tienes slug en Brand úsalo, si no, se ignora
-                slug={b.slug}
-              />
+  key={b.id}
+  href={`/catalogo?marca=${b.id}`}
+  className="group rounded-2xl border bg-white/80 p-4 transition
+             hover:-translate-y-0.5 hover:shadow-lg hover:border-gray-300
+             active:translate-y-0 active:shadow-md"
+>
+  <div className="flex items-center gap-3">
+    {/* Logo con un borde que se acentúa en hover */}
+    <BrandLogo
+      name={b.name}
+      // @ts-expect-error si tienes slug en Brand úsalo
+      slug={b.slug}
+      boxClassName="transition group-hover:ring-1 group-hover:ring-gray-200"
+    />
 
-              <div className="min-w-0">
-                <div className="font-medium leading-5 truncate">{b.name}</div>
-                <div className="text-xs text-gray-600">
-                  {b._count.products} producto{b._count.products === 1 ? '' : 's'}
-                </div>
-              </div>
-            </div>
-            <div className="mt-3 text-xs text-gray-500">Ver productos →</div>
-          </Link>
+    <div className="min-w-0">
+      <div className="font-medium leading-5 truncate group-hover:text-gray-900">
+        {b.name}
+      </div>
+      <div className="text-xs text-gray-600">
+        {b._count.products} producto{b._count.products === 1 ? '' : 's'}
+      </div>
+    </div>
+  </div>
+
+  {/* CTA con cambio sutil en hover como en ProductCard */}
+  <div className="mt-3 text-xs text-gray-500 group-hover:text-gray-700">
+    Ver productos →
+  </div>
+</Link>
         ))}
       </section>
     </main>
