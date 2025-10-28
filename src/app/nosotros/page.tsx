@@ -79,7 +79,7 @@ export default function NosotrosPage() {
       </section>
 
       {/* Métricas / confianza */}
-      <section className="bg-gray-50">
+      <section className="bg-[#d6ecff]">
         <div className="max-w-7xl mx-auto px-4 md:px-6 py-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { icon: '🚚', t: 'Cobertura nacional', d: 'Envíos a todo el país.' },
